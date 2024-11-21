@@ -7,31 +7,46 @@ const Register = () => {
     const [password, setPassword] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
+
+        if (!email || !password || !confirmPassword) {
+            setError("All fields are required.");
+            return;
+        }
+
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setError("Passwords do not match.");
+            return;
+        }
+
+        if (password.length < 6) {
+            setError("Password must be at least 6 characters long.");
             return;
         }
 
         setError(null);
         setLoading(true);
+
         try {
             await axios.post('https://eduacers-backend.onrender.com/auth/register', { email, password });
             setLoading(false);
-            navigate('/verify');
+            setSuccessMessage("Registration successful! Please check your email to verify your account.");
+            setTimeout(() => navigate('/verify'), 3000); // Redirect after 3 seconds
         } catch (error) {
             setLoading(false);
-            setError('Registration failed: ' + (error.response ? error.response.data : error.message));
+            setError('Registration failed: ' + (error.response ? error.response.data.message : error.message));
         }
     };
 
     return (
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-4">
             {error && <p className="text-red-500">{error}</p>}
+            {successMessage && <p className="text-green-500">{successMessage}</p>}
             <h2 className="text-lg font-semibold mb-4">Register</h2>
             <label htmlFor="email" className="block mb-1">Email</label>
             <input

@@ -11,9 +11,15 @@ const Login = ({ onLoginSuccess }) => {
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
+        if (!email || !password) {
+            setError("Email and Password are required.");
+            return;
+        }
+
         setError(null);
         setLoading(true);
+
         try {
             await axios.post('https://eduacers-backend.onrender.com/auth/login', { email, password });
             setLoading(false);
@@ -21,7 +27,7 @@ const Login = ({ onLoginSuccess }) => {
             navigate('/');
         } catch (error) {
             setLoading(false);
-            setError('Login failed: ' + (error.response ? error.response.data : error.message));
+            setError('Login failed: ' + (error.response ? error.response.data.message : error.message));
         }
     };
 

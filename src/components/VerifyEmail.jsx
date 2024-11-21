@@ -6,27 +6,36 @@ const VerifyEmail = () => {
     const [email, setEmail] = useState('');
     const [verificationCode, setVerificationCode] = useState('');
     const [error, setError] = useState(null);
+    const [successMessage, setSuccessMessage] = useState(null);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
     const handleSubmit = async (event) => {
         event.preventDefault();
-        
+
+        if (!email || !verificationCode) {
+            setError("All fields are required.");
+            return;
+        }
+
         setError(null);
         setLoading(true);
+
         try {
             await axios.post('https://eduacers-backend.onrender.com/auth/verify-email', { email, verificationCode });
             setLoading(false);
-            navigate('/login');
+            setSuccessMessage("Email verified successfully! Redirecting you to login...");
+            setTimeout(() => navigate('/login'), 3000); // Redirect after 3 seconds
         } catch (error) {
             setLoading(false);
-            setError('Verification failed: ' + (error.response ? error.response.data : error.message));
+            setError('Verification failed: ' + (error.response ? error.response.data.message : error.message));
         }
     };
 
     return (
         <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 mb-4">
             {error && <p className="text-red-500">{error}</p>}
+            {successMessage && <p className="text-green-500">{successMessage}</p>}
             <h2 className="text-lg font-semibold mb-4">Verify Email</h2>
             <label htmlFor="email" className="block mb-1">Email</label>
             <input
